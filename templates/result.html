@@ -5,7 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-<p>Test</p>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+</script><p>Test</p>
 <p>
 {{ chart.as_html }}</p>
 </body>

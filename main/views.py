@@ -29,9 +29,13 @@ def index(request):
     sstime = datetime.datetime.strptime(stime,'%H:%M:%S')
     ddtime = datetime.datetime.strptime(dtime,'%H:%M:%S')
 
-    result = AcctBgp5Mins.objects.values('peer_as_src').filter(stamp_inserted__gte=datetime.datetime.combine(sdate,datetime.time(sstime.hour,sstime.minute,sstime.second)),stamp_inserted__lte=datetime.datetime.combine(ddate,datetime.time(ddtime.hour,ddtime.minute,ddtime.second)),vlan='777').annotate(Sum('bytes')).order_by('-bytes__sum')
-    data_source = ModelDataSource(result,
-                                  fields=['peer_as_src', 'bytes__sum'])
-    chart = gchart.PieChart(data_source)
-    r{'chart'} = chart
+    fsdate = datetime.datetime.combine(sdate,datetime.time(sstime.hour,sstime.minute,sstime.second,0,None))
+    fddate = datetime.datetime.combine(ddate,datetime.time(ddtime.hour,ddtime.minute,ddtime.second,0,None))
+    #result = AcctBgp5Mins.objects.only().extra(select={'peer_as_s':'CAST(peer_as_src AS CHAR(50))'}).filter(
+    #stamp_inserted__gte=datetime.datetime.combine(sdate,datetime.time(sstime.hour,sstime.minute,sstime.second)),
+    #stamp_inserted__lte=datetime.datetime.combine(ddate,datetime.time(ddtime.hour,ddtime.minute,ddtime.second)),vlan='777').annotate(Sum('bytes')).order_by('-bytes__sum')
+    result = AcctBgp5Mins.objects.raw('SELECT id, CAST(`peer_as_src` AS CHAR(50)) AS `peer_as_s`, CAST(SUM(`bytes`) AS INTEGER) as `bytes__sum`,id FROM `acct_bgp_5mins` WHERE vlan="%s" AND stamp_inserted >= "%s" AND stamp_inserted <= "%s" GROUP BY `peer_as_s` ORDER BY SUM(`bytes`) DESC'%('777',fsdate.strftime('%Y-%m-%d %H:%M:%S'),fddate.strftime('%Y-%m-%d %H:%M:%S')))
+    data_source = ModelDataSource(result,fields=['peer_as_s', 'bytes__sum'])
+    mychart = gchart.PieChart(data_source)
+    r['chart'] = mychart
     return render(request, 'result.html', r)
