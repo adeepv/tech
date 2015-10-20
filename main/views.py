@@ -52,7 +52,6 @@ def index(request):
                 cache.set('asnh%s'%i[0],asholder,864000)
             tdata = tdata + [['%s - %s'%(i[0],asholder),i[1]]]
         ii = ii + 1
-    r['chart'] = mychart
     r['charttitle'] = 'Traffic for vlan %s from %s to %s'%(vlan,fsdate.strftime('%Y-%m-%d %H:%M:%S'),fddate.strftime('%Y-%m-%d %H:%M:%S'))
     r['chartlegend'] = 'By ASN'
     r['chartdata'] = tdata
