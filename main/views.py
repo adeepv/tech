@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
+import libs.ripequery
 
 # Create your views here.
 from django.shortcuts import render
@@ -36,6 +37,14 @@ def index(request):
     #stamp_inserted__lte=datetime.datetime.combine(ddate,datetime.time(ddtime.hour,ddtime.minute,ddtime.second)),vlan='777').annotate(Sum('bytes')).order_by('-bytes__sum')
     result = AcctBgp5Mins.objects.raw('SELECT id, CAST(`peer_as_src` AS CHAR(50)) AS `peer_as_s`, CAST(SUM(`bytes`) AS INTEGER) as `bytes__sum`,id FROM `acct_bgp_5mins` WHERE vlan="%s" AND stamp_inserted >= "%s" AND stamp_inserted <= "%s" GROUP BY `peer_as_s` ORDER BY SUM(`bytes`) DESC'%('777',fsdate.strftime('%Y-%m-%d %H:%M:%S'),fddate.strftime('%Y-%m-%d %H:%M:%S')))
     data_source = ModelDataSource(result,fields=['peer_as_s', 'bytes__sum'])
+    tdata = []
+    ii = 0
+    for i in data_source.data:
+        if ii == 0:
+            tdata = tdata + [i]
+        else:
+            tdata = tdata + ['%s - %s'%(i[0],ripe_get_asn_holder(i[0])),i[1]]
+    data_source.data = tdata
     mychart = gchart.PieChart(data_source)
     r['chart'] = mychart
     return render(request, 'result.html', r)
