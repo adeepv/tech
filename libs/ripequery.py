@@ -1,6 +1,6 @@
 import json
-from urllib.request import urlopen
-
+#from urllib.request import urlopen
+from urllib2 import urlopen
 
 def ripe_get_prefixes_per_asn(asn):
     """ Uses RIPE's API (https://stat.ripe.net/data/announced-prefixes/data.?)

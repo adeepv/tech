@@ -3,13 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script type='text/javascript' src='//code.jquery.com/jquery-1.9.1.js'></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
 </head>
 <body>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-    google.load("visualization", "1", {packages:["corechart"]});
-</script><p>Test</p>
-<p>
-{{ chart.as_html }}</p>
+<p>Test</p>
+
+<div style='width: 100%; height: auto; margin: 0 0 0 0;'>
+<div id="container" style="min-width: 1700px; max-width: auto; height: 800px;  margin: 0 0 0 0;">
+</div></div>
+<script>
+$(function () {
+
+    $(document).ready(function () {
+
+        // Build the chart
+        $('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: '{{ charttitle }}'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                name: "{{ chartlegend }}",
+                colorByPoint: true,
+                data: [
+                {% for item in chartdata %}
+                {
+                    name: "{{ item.0 }}",
+                    y: {{ item.1 }} 
+                },
+                {% endfor %}
+                ]
+            }]
+        });
+    });
+});
+</script>
 </body>
 </html>
