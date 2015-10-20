@@ -12,7 +12,6 @@ from django.db.models import Sum
 from graphos.sources.model import ModelDataSource
 from graphos.renderers import gchart,highcharts,yui
 
-@render_to('result.html')
 def index(request):
     r = {} # result var
     sdate = datetime.date.today()
@@ -26,22 +25,30 @@ def index(request):
     qsdate = fsdate.strftime('%Y-%m-%d %H:%M:%S')
     qddate = fddate.strftime('%Y-%m-%d %H:%M:%S')
     vlan = '777'
-    type = '5min'
+    gtype = '5min'
+    src_as = 'peer_as_src'
+    err = ''
     if request.method and request.method == 'POST':
         form = DateChartForm(request.POST)
         if form.is_valid():
-            qsdate = form.sdt
-            qddate = form.ddt
-            type = form.type
+            ff = form.cleaned_data
+            fsdate = ff['sdt']
+            fddate = ff['ddt']
+            gtype = ff['gtype']
+            vlan = ff['vlan']
+            src_as = ff['source']
         else:
             form = DateChartForm()
     else:
         form = DateChartForm()
 
+    qsdate = fsdate.strftime('%Y-%m-%d %H:%M:%S')
+    qddate = fddate.strftime('%Y-%m-%d %H:%M:%S')
+
     #result = AcctBgp5Mins.objects.only().extra(select={'peer_as_s':'CAST(peer_as_src AS CHAR(50))'}).filter(
     #stamp_inserted__gte=datetime.datetime.combine(sdate,datetime.time(sstime.hour,sstime.minute,sstime.second)),
     #stamp_inserted__lte=datetime.datetime.combine(ddate,datetime.time(ddtime.hour,ddtime.minute,ddtime.second)),vlan='777').annotate(Sum('bytes')).order_by('-bytes__sum')
-    result = AcctBgp5Mins.objects.raw('SELECT id, CAST(`peer_as_src` AS CHAR(50)) AS `peer_as_s`, CAST(SUM(`bytes`) AS INTEGER) as `bytes__sum`,id FROM `acct_bgp_5mins` WHERE vlan="%s" AND stamp_inserted >= "%s" AND stamp_inserted <= "%s" GROUP BY `peer_as_s` ORDER BY SUM(`bytes`) DESC'%(vlan,qsdate,qddata))
+    result = AcctBgp5Mins.objects.raw('SELECT id, CAST(`%s` AS CHAR(50)) AS `peer_as_s`, CAST(SUM(`bytes`) AS INTEGER) as `bytes__sum`,id FROM `acct_bgp_5mins` WHERE vlan="%s" AND stamp_inserted >= "%s" AND stamp_inserted <= "%s" GROUP BY `peer_as_s` ORDER BY SUM(`bytes`) DESC'%(src_as,vlan,qsdate,qddate))
     data_source = ModelDataSource(result,fields=['peer_as_s', 'bytes__sum'])
     tdata = []
     ii = 0
@@ -56,8 +63,10 @@ def index(request):
                 cache.set('asnh%s'%i[0],asholder,864000)
             tdata = tdata + [['%s - %s'%(i[0],asholder),i[1]]]
         ii = ii + 1
+
     r['charttitle'] = 'Traffic for vlan %s from %s to %s'%(vlan,fsdate.strftime('%Y-%m-%d %H:%M:%S'),fddate.strftime('%Y-%m-%d %H:%M:%S'))
     r['chartlegend'] = 'By ASN'
     r['chartdata'] = tdata
     r['form']  = form
-    return r
+    r['error'] = err
+    return render(request, 'result.html', r)

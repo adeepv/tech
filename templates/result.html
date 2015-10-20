@@ -6,44 +6,28 @@
     <script type='text/javascript' src='//code.jquery.com/jquery-1.10.1.js'></script>
 <script src="//code.highcharts.com/highcharts.js"></script>
 <script src="//code.highcharts.com/modules/exporting.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/jquery.datetimepicker.css"/>
+<link rel="stylesheet" type="text/css" href="/static/css/jquery.datetimepicker.css"/>
 <script src="/static/js/jquery.datetimepicker.js"></script>
 </head>
 <body>
 <p>Display Chart for traffic</p>
 <form class="form-horizontal" action="" method="post" name="update-form" class="well form-inline" id="view_form">
 {% csrf_token %}
-<p><label>Влан:</label><select id="vlan">
-    <option value="126">Dataline UA</option>
-    <option value="2755">Dataline World ACS</option>
-    <option value="2768">Dataline World KCT</option>
-    <option value="777">DTEL-IX</option>
-    <option value="556">Giganet-IX</option>
-    <option value="557">UA-IX</option>
-    <option value="872">Gigatrans-IX</option>
-    <option value="929">Yandex-IX</option>
-    <option value="1013">MailRu-IX</option>
-    <option value="1730">Fiord-IX</option>
-    <option value="1740">Fiord-World</option>
-    <option value="2639">TopNet-UA ACS</option>
-    <option value="3317">TopNet-UA KCT</option>
-    <option value="3337">Google-IX</option>
-    <option value="3332">Internal UANG-SMF</option>
-    <option value="2715">Multicast Kiev-SMF</option>
-</select>
+<p><label>{{ form.vlan.label }}:</label>{{ form.vlan }}  <label>{{ form.gtype.label }}</label> {{  form.gtype }}  <label>{{ form.source.label }}</label> {{ form.source }}
 </p>
 <p>
-С <input type="text" id="sdt"/> по <input type="text" id="ddt"/>
+С {{ form.sdt }} по {{ form.ddt }}
 <script>
-$('#sdt').datetimepicker();
-$('#ddt').datetimepicker();
+$('#id_sdt').datetimepicker({format:'d.m.Y H:i:s'});
+$('#id_ddt').datetimepicker({format:'d.m.Y H:i:s'});
 </script>
 </p>
 <div class="form-actions">
-<input type="submit" class="btn btn-info" value="{% trans 'Update' %}" name="update" class="default">
+<input type="submit" class="btn btn-info" value="Update" name="update" class="default">
 </div>
 </form>
 
+<p>{{ error }}</p>
 <div style='width: 100%; height: auto; margin: 0 0 0 0;'>
 <div id="container" style="min-width: 1700px; max-width: auto; height: 800px;  margin: 0 0 0 0;">
 </div></div>
@@ -98,6 +82,11 @@ $(function () {
         });
     });
 });
+
+
+
+
+
 </script>
 </body>
 </html>

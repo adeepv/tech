@@ -6,7 +6,7 @@ from django import forms
 class DateChartForm(forms.Form):
     sdt = forms.DateTimeField(label='From:')
     ddt = forms.DateTimeField(label='To:')
-    type = forms.ChoiceField(choices=(('5min','5 min'),('1hr','1 hour'),('1day','1 day')))
+    gtype = forms.ChoiceField(label='Type:',choices=(('5min','5 min'),('1hr','1 hour'),('1day','1 day')))
     vlan = forms.ChoiceField(label='VLAN', choices=(("126",'Dataline UA'),
         ("2755",'Dataline World ACS'),
         ("2768",'Dataline World KCT'),
@@ -23,6 +23,6 @@ class DateChartForm(forms.Form):
         ("3337",'Google-IX'),
         ("3332",'Internal UANG-SMF'),
         ("2715",'Multicast Kiev-SMF')
-                                                    ))
-
+                                                   ))
+    source = forms.ChoiceField(label='ASN', choices=(('peer_as_src','Peer AS'),('as_src','Source AS')))
 
